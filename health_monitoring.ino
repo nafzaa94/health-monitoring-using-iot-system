@@ -6,21 +6,22 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#define USE_ARDUINO_INTERRUPTS true    
-#include <PulseSensorPlayground.h> 
-
-const int PulseWire = 36;       
-int Threshold = 550;
-
 #define ONE_WIRE_BUS 4
 
 OneWire oneWire(ONE_WIRE_BUS); 
 DallasTemperature sensors(&oneWire);
 
-PulseSensorPlayground pulseSensor;
 
 float temp = 0;
-int myBPM = 0;
+
+int output = 36;
+int LOnegetif = 23;
+int LOpositif = 22;
+
+int valueOutput = 0;
+int valueLOnegetif = 0;
+int valueLOpositif = 0;
+
 
 
 // Comment this out to disable prints and save space
@@ -47,14 +48,13 @@ void myTimerEvent()
 {
   sensors.requestTemperatures(); 
   Serial.print(sensors.getTempCByIndex(0)); 
-
-  myBPM = pulseSensor.getBeatsPerMinute();
+  valueOutput = analogRead(output);
+  valueLOnegetif = digitalRead(LOnegetif);
+  valueLOpositif = digitalRead(LOpositif);
 
   temp = sensors.getTempCByIndex(0);
-
-  if (pulseSensor.sawStartOfBeat()) {            
-     Blynk.virtualWrite(V1, myBPM);                 
-  }
+           
+  Blynk.virtualWrite(V1, valueOutput);                 
   
   Blynk.virtualWrite(V0, temp);
 }
@@ -64,12 +64,11 @@ void setup()
   // Debug console
   Serial.begin(115200);
   sensors.begin();
-  pulseSensor.analogInput(PulseWire);
-  pulseSensor.setThreshold(Threshold);
 
-  if (pulseSensor.begin()) {
-    Serial.println("We created a pulseSensor Object !");
-  }
+  pinMode(output, INPUT);
+  pinMode(LOnegetif, INPUT);
+  pinMode(LOpositif, INPUT);
+  
 
   Blynk.begin(auth, ssid, pass);
   // You can also specify server:
